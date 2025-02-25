@@ -9,8 +9,6 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-export PATH="./utils:$PATH"
-
 ENV_NAME=$1
 ENV_BASE_DIR=~/.venvs
 ENV_DIR=$ENV_BASE_DIR/$ENV_NAME
@@ -30,16 +28,16 @@ if [ -d "$ENV_DIR" ]; then
 fi
 
 # Purge all loaded modules
-_echo "Purging all loaded modules..."
+echo "Purging all loaded modules..."
 module --force purge
 
 # Load necessary modules
-_echo "Loading required modules..."
+echo "Loading required modules..."
 module load StdEnv gcc opencv
 module load python/3.10.13
 
 # Create virtual environment
-_echo "Creating virtual environment: $ENV_NAME in $ENV_DIR"
+echo "Creating virtual environment: $ENV_NAME in $ENV_DIR"
 virtualenv "$ENV_DIR"
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create virtual environment."
@@ -50,19 +48,22 @@ fi
 source "$ENV_DIR/bin/activate"
 
 # Upgrade pip and install dependencies
-_echo "Upgrading pip and installing dependencies..."
+echo "Upgrading pip and installing dependencies..."
 pip install --no-index --upgrade pip
-pip install --ignore-installed numpy wandb==0.16.0 Pillow pandas matplotlib
-pip install mmcv h5netcdf tqdm scikit-learn jupyterlab ipywidgets icecream xarray seaborn cmocean \
-            torch torchvision torchmetrics torch-summary segmentation_models_pytorch
+pip install --ignore-installed numpy Pillow
+pip install scikit-learn ipywidgets \
+            torch torchvision torchmetrics torch-summary \
+            diffusers transformers huggingface-hub==0.25.2
 
 # Check whether all the packages are installed
-_echo "Checking installed packages..."
-packages=("numpy" "wandb" "mmcv" "h5netcdf" "Pillow" "pandas" "tqdm" "scikit-learn" "jupyterlab" "ipywidgets" "icecream" "matplotlib" "xarray" "seaborn" "cmocean" "torch" "torchvision" "torchmetrics" "torch-summary" "segmentation_models_pytorch")
+echo "Checking installed packages..."
+packages=("numpy" "Pillow" "scikit-learn" "ipywidgets" \
+          "torch" "torchvision" "torchmetrics" "torch-summary" \
+          "diffusers" "transformers" "huggingface-hub")
 for package in "${packages[@]}"; do
     if ! python -m pip show -q "$package"; then
-        _error "Error: Package '$package' not properly installed"
+        error "Error: Package '$package' not properly installed"
     fi
 done
 
-_echo "Environment setup complete! Activate using: source $ENV_DIR/bin/activate"
+echo "Environment setup complete! Activate using: source $ENV_DIR/bin/activate"
