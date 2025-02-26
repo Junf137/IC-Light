@@ -50,7 +50,7 @@ source "$ENV_DIR/bin/activate"
 # Upgrade pip and install dependencies
 echo "Upgrading pip and installing dependencies..."
 pip install --no-index --upgrade pip
-pip install --ignore-installed numpy Pillow
+pip install --ignore-installed numpy==1.26.4 Pillow
 pip install scikit-learn ipywidgets \
             torch torchvision torchmetrics torch-summary \
             diffusers transformers huggingface-hub==0.25.2 \
