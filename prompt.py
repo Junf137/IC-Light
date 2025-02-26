@@ -1,4 +1,5 @@
 from itertools import product
+from gradio_demo import BGSource
 
 # Define all possible categories and variations of description prompt
 DESCRIPTION_PROMPT = {
@@ -36,15 +37,34 @@ DESCRIPTION_PROMPT = {
 
 # TODO: Define all possible categories and variations of generation prompt
 GENERATION_PROMPT = {
-    "style": [
-        "realistic photography",
-        "cartoonish style",
-        "line art sketch",
-        "watercolor painting",
-        "3D render",
+    "scene": [
+        "professional product photography studio",
+        "outdoor park bench with natural surroundings",
+        "coffee shop table with cafe interior",
+        "office desk with computer and papers",
+        "home kitchen counter with appliances",
+        "library reading table with books",
+        "cozy reading room with armchair and lamp",
+        "busy street sidewalk with urban background",
+        "car cup holder with dashboard view",
+        "picnic blanket on grass",
+        "isolated on white background",
+    ],
+    "bg_source": [
+        BGSource.NONE,
+        BGSource.LEFT,
+        BGSource.RIGHT,
+        BGSource.TOP,
+        BGSource.BOTTOM,
+    ],
+    "seed": [
+        4242,
+        1234,
+        5678,
+        9012,
+        2468,
     ],
 }
-
 
 # main
 if __name__ == "__main__":
