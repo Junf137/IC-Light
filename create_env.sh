@@ -53,16 +53,18 @@ pip install --no-index --upgrade pip
 pip install --ignore-installed numpy Pillow
 pip install scikit-learn ipywidgets \
             torch torchvision torchmetrics torch-summary \
-            diffusers transformers huggingface-hub==0.25.2
+            diffusers transformers huggingface-hub==0.25.2 \
+            safetensors einops peft protobuf==3.20
 
 # Check whether all the packages are installed
 echo "Checking installed packages..."
 packages=("numpy" "Pillow" "scikit-learn" "ipywidgets" \
           "torch" "torchvision" "torchmetrics" "torch-summary" \
-          "diffusers" "transformers" "huggingface-hub")
+          "diffusers" "transformers" "huggingface_hub" "safetensors" \
+          "einops" "peft" "protobuf")
 for package in "${packages[@]}"; do
     if ! python -m pip show -q "$package"; then
-        error "Error: Package '$package' not properly installed"
+        echo "Error: Package '$package' not properly installed"
     fi
 done
 
