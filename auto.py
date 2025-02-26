@@ -1,62 +1,86 @@
-import os
+from pathlib import Path
+import json
 import numpy as np
 from PIL import Image
-from typing import List
+from itertools import product
 
-from gradio_demo import process_relight, BGSource
+from prompt import GENERATION_PROMPT
+from gradio_demo import process_relight
 
 
-# Process images
-def process_batch(input_paths: List[str], prompts: List[str], output_dir: str, **process_kwargs) -> None:
-    """
-    Batch process images with multiple prompts
-    :param input_paths: List of input image paths
-    :param prompts: List of prompts (one per image)
-    :param output_dir: Root directory to save results
-    :param process_kwargs: Additional arguments for process_relight
-    """
-    os.makedirs(output_dir, exist_ok=True)
+def process_dataset(input_dir: Path, output_root: Path, **process_kwargs: dict):
+    """Process images with base prompts and generate variations"""
+    # Create all possible generation combinations
+    combinations = list(product(GENERATION_PROMPT["scene"], GENERATION_PROMPT["bg_source"], GENERATION_PROMPT["seed"]))
 
-    for img_path, prompt in zip(input_paths, prompts):
+    for img_path in input_dir.glob("*.*"):
+        if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
+            continue
+
+        # Get base prompt from text file
+        txt_path = img_path.with_suffix(".txt")
+        if not txt_path.exists():
+            continue
+
+        with open(txt_path, "r") as f:
+            base_prompt = f.read().strip()
+
         # Load image
-        pil_img = Image.open(img_path).convert("RGB")
-        np_img = np.array(pil_img)
+        img = np.array(Image.open(img_path).convert("RGB"))
 
-        # Process image
-        preprocessed, outputs = process_relight(input_fg=np_img, prompt=prompt, **process_kwargs)
+        # Process all combinations
+        for scene, bg_source, seed in combinations:
+            # Construct full prompt
+            full_prompt = f"{base_prompt}, {scene}"
 
-        # Create output structure
-        base_name = os.path.splitext(os.path.basename(img_path))[0]
-        prompt_dir = os.path.join(output_dir, base_name, "prompt_" + prompt[:64].replace(" ", "_"))
-        os.makedirs(prompt_dir, exist_ok=True)
+            # Create output directory structure
+            output_dir = output_root
+            output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Save results
-        Image.fromarray(preprocessed).save(os.path.join(prompt_dir, "preprocessed.png"))
-        for i, output in enumerate(outputs):
-            Image.fromarray(output).save(os.path.join(prompt_dir, f"output_{i}.png"))
+            # Generate images
+            preprocessed, outputs = process_relight(
+                input_fg=img,
+                prompt=full_prompt,
+                **process_kwargs,
+                seed=seed,
+                bg_source=bg_source.value,
+            )
+
+            # save preprocessed image
+            fname_preprocessed = f"{img_path.stem}-{scene[:4]}-{bg_source.value[:2]}-{seed}-preprocessed.png"
+            Image.fromarray(preprocessed).save(output_dir / fname_preprocessed)
+
+            # Save with metadata
+            for idx, output in enumerate(outputs):
+                fname = f"{img_path.stem}-{scene[:3]}-{bg_source.value[:2]}-{seed}-{idx}.png"
+                meta = {
+                    "full_prompt": full_prompt,
+                    "base_prompt": base_prompt,
+                    "scene": scene,
+                    "bg_source": bg_source.value,
+                    "seed": seed,
+                    "source_image": img_path.name,
+                }
+
+                Image.fromarray(output).save(output_dir / fname)
+                with open(output_dir / f"{fname}.json", "w") as f:
+                    json.dump(meta, f, indent=2)
 
 
 if __name__ == "__main__":
-    # Configuration
+    input_folder = Path("./imgs/TimHortonsPaperCup")
+    output_folder = Path("./output/")
+
     config = {
-        "image_width": 512,  # Output width (multiple of 64)
-        "image_height": 640,  # Output height (multiple of 64)
-        "num_samples": 3,  # Number of outputs per image
-        "seed": 4242,  # Random seed
-        "steps": 25,  # Diffusion steps
-        "a_prompt": "best quality, high resolution, good cup shape",  # Automatic positive prompt addition
-        "n_prompt": "low resolution, cropped, worst quality, deformed cup",  # Negative prompt
-        "cfg": 2.0,  # Classifier-free guidance scale
-        "highres_scale": 1.5,  # High-res upscale factor
-        "highres_denoise": 0.5,  # High-res denoise strength
-        "lowres_denoise": 0.9,  # Low-res denoise strength
-        "bg_source": BGSource.LEFT,  # Background source
+        "image_width": 512,
+        "image_height": 640,
+        "num_samples": 1,
+        "steps": 25,
+        "a_prompt": "best quality, sharp focus",
+        "n_prompt": "lowres, blurry, distorted, deformed, incorrect logo, cropped, worst quality",
+        "cfg": 2,
+        "highres_scale": 1.5,
+        "highres_denoise": 0.5,
+        "lowres_denoise": 0.9,
     }
-
-    # Input setup
-    input_images = [""]
-
-    prompts = ["red Tim Hortons cup with white lid, Tim Hortons logo, high resolution, natural light, grass ground"]
-
-    # Run processing
-    process_batch(input_paths=input_images, prompts=prompts, output_dir="./batch_outputs", **config)
+    process_dataset(input_folder, output_folder, **config)
