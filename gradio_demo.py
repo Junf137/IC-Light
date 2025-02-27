@@ -348,3 +348,7 @@ class BGSource(Enum):
     RIGHT = "Right Light"
     TOP = "Top Light"
     BOTTOM = "Bottom Light"
+
+    @staticmethod
+    def random_source():
+        return np.random.choice(list(BGSource))

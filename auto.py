@@ -5,13 +5,13 @@ from PIL import Image
 from itertools import product
 
 from prompt import GENERATION_PROMPT
-from gradio_demo import process_relight
+from gradio_demo import process_relight, BGSource
 
 
 def process_dataset(input_dir: Path, output_root: Path, **process_kwargs: dict):
     """Process images with base prompts and generate variations"""
     # Create all possible generation combinations
-    combinations = list(product(GENERATION_PROMPT["scene"], GENERATION_PROMPT["bg_source"], GENERATION_PROMPT["seed"]))
+    combinations = list(product(GENERATION_PROMPT["scene"]))
 
     for img_path in input_dir.glob("*.*"):
         if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
@@ -29,9 +29,13 @@ def process_dataset(input_dir: Path, output_root: Path, **process_kwargs: dict):
         img = np.array(Image.open(img_path).convert("RGB"))
 
         # Process all combinations
-        for scene, bg_source, seed in combinations:
+        for scene in combinations:
             # Construct full prompt
             full_prompt = f"{base_prompt}, {scene}"
+
+            # get random bg source and seed for each image
+            bg_source = BGSource.random_source()
+            seed = np.random.randint(0, 2**31 - 1)
 
             # Create output directory structure
             output_dir = output_root
