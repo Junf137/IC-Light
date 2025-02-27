@@ -47,7 +47,6 @@ GENERATION_PROMPT = {
         "busy street sidewalk with urban background",
         "car cup holder with dashboard view",
         "picnic blanket on grass",
-        "isolated on white background",
     ],
     "bg_source": [
         BGSource.NONE,
