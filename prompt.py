@@ -35,7 +35,6 @@ DESCRIPTION_PROMPT = {
     ],
 }
 
-# TODO: Define all possible categories and variations of generation prompt
 GENERATION_PROMPT = {
     "scene": [
         "professional product photography studio",

@@ -336,6 +336,7 @@ def process(input_fg, prompt, image_width, image_height, num_samples, seed, step
 
 @torch.inference_mode()
 def process_relight(input_fg, prompt, image_width, image_height, num_samples, seed, steps, a_prompt, n_prompt, cfg, highres_scale, highres_denoise, lowres_denoise, bg_source):
+    # TODO: use sam2 with text-conditioned object segmentation
     input_fg, matting = run_rmbg(input_fg)
     results = process(input_fg, prompt, image_width, image_height, num_samples, seed, steps, a_prompt, n_prompt, cfg, highres_scale, highres_denoise, lowres_denoise, bg_source)
     return input_fg, results
