@@ -35,6 +35,7 @@ DESCRIPTION_PROMPT = {
     ],
 }
 
+
 GENERATION_PROMPT = {
     "scene": [
         "professional product photography studio",
@@ -48,20 +49,8 @@ GENERATION_PROMPT = {
         "car cup holder with dashboard view",
         "picnic blanket on grass",
     ],
-    "bg_source": [
-        BGSource.NONE,
-        BGSource.LEFT,
-        BGSource.RIGHT,
-        BGSource.TOP,
-        BGSource.BOTTOM,
-    ],
-    "seed": [
-        4242,
-        1234,
-        5678,
-        9012,
-        2468,
-    ],
+    "bg_source": [],
+    "seed": [],
 }
 
 # main
