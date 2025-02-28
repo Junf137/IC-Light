@@ -10,8 +10,6 @@ from gradio_demo import process_relight, BGSource
 
 def process_dataset(input_dir: Path, output_root: Path, **process_kwargs: dict):
     """Process images with base prompts and generate variations"""
-    # Create all possible generation combinations
-    combinations = list(product(GENERATION_PROMPT["scene"]))
 
     for img_path in input_dir.glob("*.*"):
         if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
@@ -28,8 +26,7 @@ def process_dataset(input_dir: Path, output_root: Path, **process_kwargs: dict):
         # Load image
         img = np.array(Image.open(img_path).convert("RGB"))
 
-        # Process all combinations
-        for scene in combinations:
+        for scene in GENERATION_PROMPT["scene"]:
             # Construct full prompt
             full_prompt = f"{base_prompt}, {scene}"
 
